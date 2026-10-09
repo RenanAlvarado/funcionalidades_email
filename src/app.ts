@@ -1,13 +1,33 @@
-import express from "express";
+import express, { type Express } from "express";
+import routes from "./routes";
+import "./config/database";
+import errorHandler from "./middlewares/errorHandler";
 
-const app = express();
+class App {
+  public server: Express;
 
-app.use(express.json());
+  constructor() {
+    this.server = express();
 
-app.get("/", (_req, res) => {
-  res.json({
-    message: "Servidor funcionando!",
-  });
-});
+    this.middlewares();
+    this.routes();
+    this.exceptionHandler();
+  }
 
-export default app;
+  // Middlewares globais
+  private middlewares(): void {
+    this.server.use(express.json());
+  }
+
+  // Rotas da aplicação
+  private routes(): void {
+    this.server.use("/api", routes);
+  }
+
+  // Tratamento global de erros
+  private exceptionHandler(): void {
+    this.server.use(errorHandler);
+  }
+}
+
+export default new App().server;

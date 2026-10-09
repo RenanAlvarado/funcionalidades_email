@@ -20,6 +20,14 @@ export class User {
   @Column({ type: "varchar", length: 255 })
   passwordHash!: string;
 
+  @Column({
+    name: "email_verified_at",
+    type: "datetime",
+    nullable: true,
+    default: null,
+  })
+  emailVerifiedAt!: Date | null;
+
   @CreateDateColumn({ type: "datetime" })
   createdAt!: Date;
 
