@@ -77,6 +77,10 @@ class UserService {
     return user;
   }
 
+  async findByEmailOrNull(email: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ email });
+  }
+
   // Atualizar usuário
   async update(
     id: number,
@@ -105,6 +109,20 @@ class UserService {
     const updatedUser = await this.userRepository.save(user);
 
     return this.toResponseDto(updatedUser);
+  }
+
+  async updatePassword(userId: number, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+    });
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado.", 404);
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.userRepository.save(user);
   }
 
   // Marcar e-mail como verificado

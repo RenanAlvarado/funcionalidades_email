@@ -4,6 +4,8 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { VerifyEmailDto } from "./dto/verifyEmail.dto";
 import { ResendVerificationDto } from "./dto/resendVerification.dto";
+import { ResetPasswordDto } from "./dto/resetPassword.dto";
+import { ForgotPasswordDto } from "./dto/forgotPassword.dto";
 
 class AuthController {
   async register(req: Request, res: Response): Promise<void> {
@@ -30,6 +32,22 @@ class AuthController {
     );
 
     res.status(200).json(result);
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<Response> {
+    const result = await AuthService.forgotPassword(
+      req.body as ForgotPasswordDto,
+    );
+
+    return res.status(200).json(result);
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<Response> {
+    const result = await AuthService.resetPassword(
+      req.body as ResetPasswordDto,
+    );
+
+    return res.status(200).json(result);
   }
 }
 
