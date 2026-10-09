@@ -9,12 +9,10 @@ import { RegisterDto } from "./dto/register.dto";
 import { UserResponseDto } from "../user/dto/userResponse.dto";
 import { User } from "../user/user.entity";
 import { LoginDto } from "./dto/login.dto";
+import emailVerificationService from "../emailVerification/emailVerificationService";
+import { VerifyEmailDto } from "./dto/verifyEmail.dto";
 
 class AuthService {
-  private get userRepository(): Repository<User> {
-    return database.getRepository(User);
-  }
-
   private generateToken(userId: number): string {
     return jwt.sign({}, jwtSecret!, {
       subject: String(userId),
@@ -26,11 +24,21 @@ class AuthService {
   // Cadastro
   async register(
     registerDto: RegisterDto,
-  ): Promise<{ user: UserResponseDto; token: string }> {
+  ): Promise<{ user: UserResponseDto; message: string }> {
     const user = await UserService.store(registerDto);
-    const token = this.generateToken(user.id);
 
-    return { user, token };
+    // Criar tabela adicional
+    const verificationToken = await emailVerificationService.createToken(
+      user.id,
+    );
+
+    console.log(verificationToken);
+
+    return {
+      user,
+      message:
+        "Cadastro realizado. Confirme seu e-mail para acessar sua conta.",
+    };
   }
 
   // Login
@@ -47,6 +55,12 @@ class AuthService {
       throw new AppError("E-mail ou senha inválidos.", 401);
     }
 
+    // Verificar se o e-mail foi confirmado
+    if (user!.emailVerifiedAt === null) {
+      throw new AppError("Confirme seu e-mail antes de entrar.", 403);
+    }
+
+    // Gerar JWT somente após validar as credenciais e a confirmação
     const token = this.generateToken(user!.id);
 
     const userResponse = UserService.toResponseDto(user!);
@@ -54,6 +68,17 @@ class AuthService {
     return {
       user: userResponse,
       token,
+    };
+  }
+
+  // Verificar email baseado no token
+  async verifyEmail(
+    verifyEmailDto: VerifyEmailDto,
+  ): Promise<{ message: string }> {
+    await emailVerificationService.verifyToken(verifyEmailDto.token);
+
+    return {
+      message: "E-mail confirmado com sucesso.",
     };
   }
 }

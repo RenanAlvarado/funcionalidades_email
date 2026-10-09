@@ -40,6 +40,7 @@ class UserService {
       name,
       email,
       passwordHash,
+      emailVerifiedAt: null,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -104,6 +105,23 @@ class UserService {
     const updatedUser = await this.userRepository.save(user);
 
     return this.toResponseDto(updatedUser);
+  }
+
+  // Marcar e-mail como verificado
+  async verifyEmail(id: number): Promise<void> {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado.", 404);
+    }
+
+    if (user.emailVerifiedAt !== null) {
+      throw new AppError("Este e-mail já foi confirmado.", 400);
+    }
+
+    user.emailVerifiedAt = new Date();
+
+    await this.userRepository.save(user);
   }
 
   // Excluir usuário

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-
 import AuthService from "./authService";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { VerifyEmailDto } from "./dto/verifyEmail.dto";
 
 class AuthController {
   async register(req: Request, res: Response): Promise<void> {
@@ -13,6 +13,12 @@ class AuthController {
 
   async login(req: Request, res: Response): Promise<void> {
     const result = await AuthService.login(req.body as LoginDto);
+
+    res.status(200).json(result);
+  }
+
+  async verifyEmail(req: Request, res: Response): Promise<void> {
+    const result = await AuthService.verifyEmail(req.body as VerifyEmailDto);
 
     res.status(200).json(result);
   }
