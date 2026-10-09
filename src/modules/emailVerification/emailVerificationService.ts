@@ -62,6 +62,16 @@ class EmailVerificationService {
 
     await this.tokenRepository.save(verificationToken);
   }
+
+  async invalidatePreviousTokens(userId: number): Promise<void> {
+    await this.tokenRepository
+      .createQueryBuilder()
+      .update(EmailVerificationToken)
+      .set({ consumedAt: new Date() })
+      .where("user_id = :userId", { userId })
+      .andWhere("consumed_at IS NULL")
+      .execute();
+  }
 }
 
 export default new EmailVerificationService();

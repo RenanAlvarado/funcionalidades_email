@@ -11,6 +11,8 @@ import { User } from "../user/user.entity";
 import { LoginDto } from "./dto/login.dto";
 import emailVerificationService from "../emailVerification/emailVerificationService";
 import { VerifyEmailDto } from "./dto/verifyEmail.dto";
+import { ResendVerificationDto } from "./dto/resendVerification.dto";
+import emailService from "../email/emailService";
 
 class AuthService {
   private generateToken(userId: number): string {
@@ -32,7 +34,15 @@ class AuthService {
       user.id,
     );
 
-    console.log(verificationToken);
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+      throw new Error("Configure FRONTEND_URL no ambiente.");
+    }
+
+    const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    await emailService.sendVerificationEmail(user.email, verificationLink);
 
     return {
       user,
@@ -79,6 +89,38 @@ class AuthService {
 
     return {
       message: "E-mail confirmado com sucesso.",
+    };
+  }
+
+  async resendVerification(
+    resendVerificationDto: ResendVerificationDto,
+  ): Promise<{ message: string }> {
+    const { email } = resendVerificationDto;
+
+    const user = await UserService.findByEmail(email);
+
+    if (user!.emailVerifiedAt !== null) {
+      throw new AppError("Este e-mail já foi confirmado.", 400);
+    }
+
+    await emailVerificationService.invalidatePreviousTokens(user!.id);
+
+    const verificationToken = await emailVerificationService.createToken(
+      user!.id,
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+      throw new Error("Configure FRONTEND_URL no ambiente.");
+    }
+
+    const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    await emailService.sendVerificationEmail(user!.email, verificationLink);
+
+    return {
+      message: "Um novo link de confirmação foi enviado para seu e-mail.",
     };
   }
 }

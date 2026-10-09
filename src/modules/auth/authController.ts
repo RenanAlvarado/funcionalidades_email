@@ -3,6 +3,7 @@ import AuthService from "./authService";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { VerifyEmailDto } from "./dto/verifyEmail.dto";
+import { ResendVerificationDto } from "./dto/resendVerification.dto";
 
 class AuthController {
   async register(req: Request, res: Response): Promise<void> {
@@ -19,6 +20,14 @@ class AuthController {
 
   async verifyEmail(req: Request, res: Response): Promise<void> {
     const result = await AuthService.verifyEmail(req.body as VerifyEmailDto);
+
+    res.status(200).json(result);
+  }
+
+  async resendVerification(req: Request, res: Response): Promise<void> {
+    const result = await AuthService.resendVerification(
+      req.body as ResendVerificationDto,
+    );
 
     res.status(200).json(result);
   }

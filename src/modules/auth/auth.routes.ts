@@ -5,6 +5,7 @@ import AuthController from "./authController";
 import { registerDto } from "./dto/register.dto";
 import { loginDto } from "./dto/login.dto";
 import { verifyEmailSchema } from "./dto/verifyEmail.dto";
+import { resendVerificationSchema } from "./dto/resendVerification.dto";
 
 const authRoutes = Router();
 
@@ -24,6 +25,12 @@ authRoutes.post(
   "/verify-email",
   validateBody(verifyEmailSchema),
   AuthController.verifyEmail.bind(AuthController),
+);
+
+authRoutes.post(
+  "/resend-verification",
+  validateBody(resendVerificationSchema),
+  AuthController.resendVerification.bind(AuthController),
 );
 
 export default authRoutes;

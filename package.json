@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.24.5",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.32.1",
     "typeorm": "^1.1.2",
     "yup": "^1.7.1"
   },
